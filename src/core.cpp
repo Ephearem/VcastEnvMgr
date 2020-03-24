@@ -72,10 +72,26 @@ std::string calcTempDirectoryName()
     time_t tt;
     time( &tt );
     tm TM = *localtime( &tt );
-    return std::string("tmp" +
-    std::to_string(TM.tm_mon) + std::to_string(TM.tm_mday) + std::to_string(TM.tm_year + 1900) +
-    "_" +
-    std::to_string(TM.tm_hour) + std::to_string(TM.tm_min) + std::to_string(TM.tm_sec));
+
+    std::string retValue = "tmp";    
+    if(TM.tm_mon < 10)
+        retValue.push_back('0');
+    retValue += std::to_string(TM.tm_mon);
+    if(TM.tm_mday < 10)
+        retValue.push_back('0');
+    retValue += std::to_string(TM.tm_mday);
+    retValue += std::to_string(TM.tm_year + 1900);
+    retValue.push_back('_');
+    if(TM.tm_hour < 10)
+        retValue.push_back('0');
+    retValue += std::to_string(TM.tm_hour);
+    if(TM.tm_min < 10)
+        retValue.push_back('0');
+    retValue += std::to_string(TM.tm_min);
+    if(TM.tm_sec < 10)
+        retValue.push_back('0');
+    retValue += std::to_string(TM.tm_sec);
+    return retValue;
 }
 
 
