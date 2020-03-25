@@ -394,9 +394,9 @@ void deploy(std::string const& regressionScriptsPath, std::string const& sourceC
             warningMessage += "\nTo successful deploying of the environments, the relative paths to the source code will be changed.\n";
             warningMessage += "This can make it difficult to deploy this environments in the future.\n";
             warningMessage += "Ways to solve this:\n";
-            warningMessage += " 1) Re-execute this program from safe dir (in this case its: " + ::calcSafeTempDirectoryPath(sourceCodePath) + ");\n";
-            warningMessage += " 2) Re-Execute this program with -safe parameter\n";
-            warningMessage += " 3) Press any key to ignore this warning and deploy environments in the directory: " + tempDirectoryPath;
+            //warningMessage += " 1) Re-execute this program from safe dir (in this case its: " + ::calcSafeTempDirectoryPath(sourceCodePath) + ");\n";
+            warningMessage += " 1) Re-Execute this program with -safe parameter\n";
+            warningMessage += " 2) Press any key to ignore this warning and deploy environments anyway";
             ::showMessage(warningMessage);
             warningMessage.clear();
             warningMessage = "Ok...";
