@@ -11,27 +11,35 @@ Function: showHelp
 
 \brief Displays a help message.
 ------------------------------------------------------------------------------*/
-//TODO: IF THIS FUNCTION IS VOID - THIS APP CRASHS ON WINDOWS 7. PHUCKING MAGIC.
 void showHelp()
 {
-    /*std::cout << L"HELP" << std::endl;
-    std::cout << L"This program recursively finds and copies all regression scripts to a temporary directory, deploys them (by running .bat files) and, if specified in the launch options, generates full reports." << std::endl;
-    std::cout << L"The name of the temporary directory is in the format \"tmp_mmddyyyy_hhmmss\"." << std::endl;
-    std::cout << L"By default, a temporary directory is created where this .exe file is located." << std::endl;
-    std::cout << L"But this may not be safe, since in regression scripts the relative paths to the source code are most often used. Actually, the success of regression script deployment depends on their location relative to the source code." << std::endl;
-    std::cout << L"Most often, in the PSA repositories, the \"regression scripts\" directory is located in the same place as the source code. Therefore, it is recommended that you run the .exe file from there." << std::endl;
-    std::cout << L"If the distance from the temporary folder to the source code is different from the default (2), the program will warn you that the paths in the copies will be changed." << std::endl;
+    system("cls");
+    std::wcout << "VcastEnvMgr v0.01" << std::endl;
+    std::wcout << std::endl;
+    std::wcout << "Brief:" << std::endl;
+    std::wcout << "This program recursively finds and copies all regression scripts to a temporary directory, deploys them (by running .bat files) and, if specified in the launch options, generates full reports." << std::endl;
+    std::wcout << std::endl;
+    std::wcout << "Some info:" << std::endl;
+    std::wcout << "The name of the temporary directory is in the format \"tmp_yyyymmdd_hhmmss\"." << std::endl;
+    std::wcout << "By default, a temporary directory is created where this .exe file is located." << std::endl;
+    std::wcout << "But this may not be safe, since in regression scripts the relative paths to the source code are most often used. Actually, the success of regression script deployment depends on their location relative to the source code." << std::endl;
+    std::wcout << "Most often, in the PSA repositories, the \"regression scripts\" directory is located in the same place as the source code. Therefore, it is recommended that you run the .exe file from there." << std::endl;
+    std::wcout << "If the distance from the temporary folder to the source code is different from the default (2), the program will warn you that the paths in the copies will be changed." << std::endl;
+    std::wcout << std::endl;
+    std::wcout << "Allowable command templates:" << std::endl;
+    std::wcout << "\t-deploy rs=[regression scripts path] src=[source code path] [flags]" << std::endl;
+    std::wcout << "example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\ -safe -full" << std::endl;
+    std::wcout << std::endl;
+    std::wcout << "Allowable flags:" << std::endl;
+    std::wcout << "\t-safe - Creates a temporary directory in a place that does not require path changes in .bat and .env files (most often this is the 'trunk' folder)." << std::endl;
+    std::wcout << "\t-full - Changes management report generation instruction to full report generation instruction." << std::endl;
+    std::wcout << std::endl;
+    std::wcout << "Commands and flags should be specified in the launch parameters." << std::endl;
+    std::wcout << std::endl;
+    std::wcout << " evgeny.gancharik@psa-software.com" << std::endl;
+    std::wcout << " 04/22/2020" << std::endl;
     std::cout << std::endl;
-    std::cout << L"Allowable command templates:" << std::endl;
-    std::cout << L"-deploy rs=[regression scripts path] src=[source code path] [flags]" << std::endl;
-    std::cout << L"(example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\)" << std::endl;
-    std::cout << L"Allowable flags:" << std::endl;
-    std::cout << L"-safe - Creates a temporary directory in a place that does not require path changes in .bat and .env files (most often this is the 'trunk' folder)." << std::endl;
-    std::cout << L"Commands and flags can be specified in the launch parameters or entered into the console window when the program starts without launch parameters." << std::endl;
-    std::cout << std::endl;
-    std::cout << L"evgeny.gancharik@psa-software.com" << std::endl;
-    std::cout << L"22.04.2020" << std::endl;
-    system("pause");*/
+    system("pause");
 }
 
 
@@ -165,13 +173,13 @@ std::string calcTempDirectoryName(std::string const& prefix)
     tm TM = *localtime( &tt );
 
     std::string retValue = prefix;    
+    retValue += std::to_string(TM.tm_year + 1900);
     if(TM.tm_mon < 10)
         retValue.push_back('0');
     retValue += std::to_string(TM.tm_mon);
     if(TM.tm_mday < 10)
         retValue.push_back('0');
-    retValue += std::to_string(TM.tm_mday);
-    retValue += std::to_string(TM.tm_year + 1900);
+    retValue += std::to_string(TM.tm_mday);    
     retValue.push_back('_');
     if(TM.tm_hour < 10)
         retValue.push_back('0');
