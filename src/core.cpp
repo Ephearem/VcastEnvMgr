@@ -3,7 +3,82 @@
 #include <Windows.h>
 #include <vector>
 #include <ctime>
+#include <iostream>
+#include <conio.h>
 
+/**-----------------------------------------------------------------------------
+Function: showHelp
+
+\brief Displays a help message.
+------------------------------------------------------------------------------*/
+//TODO: IF THIS FUNCTION IS VOID - THIS APP CRASHS ON WINDOWS 7. PHUCKING MAGIC.
+void showHelp()
+{
+    /*std::cout << L"HELP" << std::endl;
+    std::cout << L"This program recursively finds and copies all regression scripts to a temporary directory, deploys them (by running .bat files) and, if specified in the launch options, generates full reports." << std::endl;
+    std::cout << L"The name of the temporary directory is in the format \"tmp_mmddyyyy_hhmmss\"." << std::endl;
+    std::cout << L"By default, a temporary directory is created where this .exe file is located." << std::endl;
+    std::cout << L"But this may not be safe, since in regression scripts the relative paths to the source code are most often used. Actually, the success of regression script deployment depends on their location relative to the source code." << std::endl;
+    std::cout << L"Most often, in the PSA repositories, the \"regression scripts\" directory is located in the same place as the source code. Therefore, it is recommended that you run the .exe file from there." << std::endl;
+    std::cout << L"If the distance from the temporary folder to the source code is different from the default (2), the program will warn you that the paths in the copies will be changed." << std::endl;
+    std::cout << std::endl;
+    std::cout << L"Allowable command templates:" << std::endl;
+    std::cout << L"-deploy rs=[regression scripts path] src=[source code path] [flags]" << std::endl;
+    std::cout << L"(example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\)" << std::endl;
+    std::cout << L"Allowable flags:" << std::endl;
+    std::cout << L"-safe - Creates a temporary directory in a place that does not require path changes in .bat and .env files (most often this is the 'trunk' folder)." << std::endl;
+    std::cout << L"Commands and flags can be specified in the launch parameters or entered into the console window when the program starts without launch parameters." << std::endl;
+    std::cout << std::endl;
+    std::cout << L"evgeny.gancharik@psa-software.com" << std::endl;
+    std::cout << L"22.04.2020" << std::endl;
+    system("pause");*/
+}
+
+
+/**-----------------------------------------------------------------------------
+Function: showMessage
+
+\brief Displays a message and waits for any key to be pressed.
+------------------------------------------------------------------------------*/
+void showMessage(std::string const& text)
+{
+    std::cout << text << std::endl;
+    std::cout << std::endl << "Press any key to continue..." << std::endl << std::endl;
+    getch();
+}
+
+
+/**-----------------------------------------------------------------------------
+Function: throwError
+
+\brief Displays a message and waits for any key to be pressed.
+Finishes the program with 'errorCode' code.
+------------------------------------------------------------------------------*/
+void throwError(size_t errorCode, std::string const& text)
+{
+    std::cout << "Error! " << text << std::endl;
+    std::cout << "Press any key to show HELP." << std::endl;
+    getch();   
+    ::showHelp();
+    exit(errorCode); // TODO: is it safe (?)
+}
+
+
+/**-----------------------------------------------------------------------------
+Function: normalizePath
+
+\brief // TODO:
+------------------------------------------------------------------------------*/
+void normalizePath(std::string& path)
+{
+    for(auto &c : path)
+    {
+        if(c == '/')
+            c = '\\';
+    }
+    if(path.back() != '\\')
+        path.push_back('\\');
+}
 
 /**-----------------------------------------------------------------------------
 Function: findFiles
@@ -65,15 +140,31 @@ std::vector<File> findFiles(std::string const& path, std::string const& pattern,
 
 /**-----------------------------------------------------------------------------
 Function: calcTempDirectoryName
+\brief Returns path of this program
+------------------------------------------------------------------------------*/
+std::string calcExecutablePath()
+{
+    LPSTR programPath = new CHAR[MAX_PATH];
+    GetModuleFileNameA(GetModuleHandle(NULL), programPath, MAX_PATH); // TODO: use argv[0] istead of this shit (?)
+    std::string ret(programPath);
+     do // TODO: it can be implemented faster (?)
+    {
+        ret.pop_back();
+    } while (ret.at(ret.size() - 1) != '\\');
+    return ret;
+}
+
+/**-----------------------------------------------------------------------------
+Function: calcTempDirectoryName
 \brief Creates a string in format "tmpMMDDYYYY_HHMMSS"
 ------------------------------------------------------------------------------*/
-std::string calcTempDirectoryName()
+std::string calcTempDirectoryName(std::string const& prefix)
 {
     time_t tt;
     time( &tt );
     tm TM = *localtime( &tt );
 
-    std::string retValue = "tmp";    
+    std::string retValue = prefix;    
     if(TM.tm_mon < 10)
         retValue.push_back('0');
     retValue += std::to_string(TM.tm_mon);
@@ -96,29 +187,26 @@ std::string calcTempDirectoryName()
 
 
 /**-----------------------------------------------------------------------------
-Function: createTempDir
+Function: calcSafeTempDirectoryPath
 
-\brief Creates a directory for storing copies of environments.
-The directory is created in the same directory as the executable file.
+\brief Returns a path two directories above the source code.
 ------------------------------------------------------------------------------*/
-std::string const createTempDirectory(std::string const& name)
+std::string calcSafeTempDirectoryPath(std::string const& sourceCodePath)
 {
-    std::string tempDirFullPath;
+    std::string retValue = sourceCodePath;
+    size_t counter = 0;
 
-    tempDirFullPath.resize(MAX_PATH);
-    /* get full path of this executable */
-    LPSTR programPath = new CHAR[MAX_PATH];
-    GetModuleFileNameA(GetModuleHandle(NULL), programPath, MAX_PATH); // TODO: use argv[0] istead of this shit (?)
-    tempDirFullPath = programPath;
-
-    do // TODO: it can be implemented faster (?)
+    while(retValue.size() != 0)
     {
-        tempDirFullPath.pop_back();
-    } while (tempDirFullPath.at(tempDirFullPath.size() - 1) != '\\');
-    tempDirFullPath += name + "\\";
+        if(retValue.back() == '/' || retValue.back() == '\\')
+            counter++;
 
-    CreateDirectoryA(tempDirFullPath.c_str(), NULL);
-    return tempDirFullPath;
+        if(counter == 2)
+            break;
+        retValue.pop_back();
+    }
+
+   return retValue;
 }
 
 
@@ -274,41 +362,72 @@ Process the copies ->
     (edit .env files, edit .bat files)
 Execute the copies of .bat files to deploy environments
 ------------------------------------------------------------------------------*/
-void deploy(std::string const& regressionScriptsPath, std::string const& sourceCodePath)
+void deploy(std::string const& regressionScriptsPath, std::string const& sourceCodePath, bool isSafeMode, bool isFullReport)
 {
-    // TODO: 
-    // size_t distRs = calcBackstepsToDriveRoot(regressionScriptsPath);
-    // size_t distSrc = calcBackstepsToDriveRoot(sourceCodePath);
-    
 
-    /* Calculate the name of the temporary directory (based on the current date and time), create a temporary directory */   
-    std::string tempDirFullPath = ::createTempDirectory(::calcTempDirectoryName());
-    /* Calc the backsteps count from this dir to the drive root */  
+    std::string tempDirectoryPath;
+
+    
+    std::string warningMessage;
+    if(isSafeMode)
+    {
+        tempDirectoryPath = ::calcSafeTempDirectoryPath(sourceCodePath);
+        std::cout << "The program is launched with the -safe option." << std::endl;
+    }
+    else
+    {
+        tempDirectoryPath = calcExecutablePath();
+        if(::calcSafeTempDirectoryPath(sourceCodePath) != tempDirectoryPath)
+        {
+            std::string warningMessage;
+            warningMessage = "Warning! The program is launched without the -safe option.\n";
+            warningMessage += "A temporary environments directory will be created in the:\n";
+            warningMessage += tempDirectoryPath;
+            warningMessage += "\nTo successful deploying of the environments, the relative paths to the source code will be changed.\n";
+            warningMessage += "This can make it difficult to deploy this environments in the future.\n";
+            warningMessage += "Ways to solve this:\n";
+            warningMessage += " 1) Re-execute this program from safe dir (in this case its: " + ::calcSafeTempDirectoryPath(sourceCodePath) + ");\n";
+            warningMessage += " 2) Re-Execute this program with -safe parameter\n";
+            warningMessage += " 3) Press any key to ignore this warning and deploy environments in the directory: " + tempDirectoryPath;
+            ::showMessage(warningMessage);
+            warningMessage.clear();
+            warningMessage = "Ok...";
+        }
+    }    
+    
+    std::string tempDirFullPath = tempDirectoryPath + ::calcTempDirectoryName("tmp") + "\\";
+    warningMessage += "The environments will be copied in the directory: " + tempDirFullPath; 
+    ::showMessage(warningMessage);
+    /* create tmp dir */
+    CreateDirectoryA(tempDirFullPath.c_str(), NULL);
+
+    /* Calc the backsteps count from the temp dir to the drive root */  
     size_t backsteps = ::calcBackstepsToDriveRoot(tempDirFullPath);    
     /* Copy environments in the temporary dir */
     std::vector<File> copies = ::copyEnvironments(regressionScriptsPath, tempDirFullPath, true);
     /* process the copies */
     for(auto &f : copies)
     {
-        if(f.getExtension() == "env")
-        {
-            ::editEnvFile(f, backsteps);
-        }
-        else if(f.getExtension() == "bat")
-        {
-            ::editBatFile(f, backsteps, true);
-        }
+        // TODO: throw an error if backsteps != 2 in the safe mode(!)
+        if(!isSafeMode && f.getExtension() == "env")        
+            ::editEnvFile(f, backsteps);        
+        else if(f.getExtension() == "bat")        
+            ::editBatFile(f, isSafeMode? 2 : backsteps, isFullReport);        
     }
     /* Execute the copies of .bat files to deploy environments */
+    size_t counter = 0;
     for(auto &f : copies)
     {
         if(f.getExtension() == "bat") // TODO: move this in previous cycle
         {
+            std::cout << "Executing " << f.getFullName() << "..." << std::endl;
             std::string runCmd = (std::string("start /wait /d ") + f.getPath() + " cmd /c " + f.getFullPath());
-            //std::cout << runCmd << std::endl;
             system(runCmd.c_str());
+            counter++;
         }
     }   
+    std::cout << counter << " environments has been succcessfully deployed, press any key to exit...";
+    getch();
 }
 
 
@@ -317,13 +436,12 @@ Function: fixpaths
 
 \brief TODO: 
 ------------------------------------------------------------------------------*/
-void fixpaths(std::string const& regressionScriptsPath, size_t backstepsCount)
+/*void fixpaths(std::string const& regressionScriptsPath, size_t backstepsCount)
 {
     std::vector<File> envFiles = ::findFiles(regressionScriptsPath, "*.env", true);
-    /* for each .env file */
+   
     for(auto & envFile: envFiles)
     {
-        /* find a .bat pair file */
         std::vector<File> batFiles = ::findFiles(envFile.getPath(), envFile.getName() + ".bat", false);
         if(batFiles.size() != 0)
         {
@@ -331,4 +449,4 @@ void fixpaths(std::string const& regressionScriptsPath, size_t backstepsCount)
             ::editEnvFile(envFile, backstepsCount);
         }
     }
-}
+}*/
