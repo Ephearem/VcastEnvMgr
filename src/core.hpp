@@ -18,4 +18,4 @@ void editBatFile(File & file, size_t backstepsCount, bool isFullReport);
 size_t calcBackstepsToDriveRoot(std::string const& path);
 
 void deploy(std::string const& regressionScriptsPath, std::string const& sourceCodePath, bool isSafeMode, bool isFullReport);
-void fixpaths(std::string const& regressionScriptsPath, size_t backstepsCount); // TODO: 
+// void fixpaths(std::string const& regressionScriptsPath, size_t backstepsCount); // TODO: 

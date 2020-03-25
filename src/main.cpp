@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
     std::string rsPath;
     std::string srcPath;
-    bool isSafe = false;
+    bool isSafe = true;
     bool isFullReport = false;
     if(std::string(argv[1]) == "-deploy")
     {
@@ -24,8 +24,6 @@ int main(int argc, char** argv)
                 rsPath = curStr.substr(3, curStr.size() - 3);
             else if(curStr.find("src=") != std::string::npos)
                 srcPath = curStr.substr(4, curStr.size() - 4);
-            else if(curStr == "-safe")
-                isSafe = true;
             else if(curStr == "-full")
                 isFullReport = true;
                 

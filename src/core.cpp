@@ -20,21 +20,17 @@ void showHelp()
     std::wcout << "This program recursively finds and copies all regression scripts to a temporary directory, deploys them (by running .bat files) and, if specified in the launch options, generates full reports." << std::endl;
     std::wcout << std::endl;
     std::wcout << "Some info:" << std::endl;
-    std::wcout << "The name of the temporary directory is in the format \"tmp_yyyymmdd_hhmmss\"." << std::endl;
-    std::wcout << "By default, a temporary directory is created where this .exe file is located." << std::endl;
-    std::wcout << "But this may not be safe, since in regression scripts the relative paths to the source code are most often used. Actually, the success of regression script deployment depends on their location relative to the source code." << std::endl;
-    std::wcout << "Most often, in the PSA repositories, the \"regression scripts\" directory is located in the same place as the source code. Therefore, it is recommended that you run the .exe file from there." << std::endl;
-    std::wcout << "If the distance from the temporary folder to the source code is different from the default (2), the program will warn you that the paths in the copies will be changed." << std::endl;
+    std::wcout << "The name of the temporary directory is in the format \"tmp_yyyymmdd_hhmmss\"." << std::endl;    
+    std::wcout << "Most often, in the PSA repositories, the \"regression scripts\" directory is located in the same place as the source code. Therefore, The temporary directory will be located at /src/../ too." << std::endl;
     std::wcout << std::endl;
     std::wcout << "Allowable command templates:" << std::endl;
-    std::wcout << "\t-deploy rs=[regression scripts path] src=[source code path] [flags]" << std::endl;
-    std::wcout << "example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\ -safe -full" << std::endl;
+    std::wcout << "\t-deploy rs=[regression scripts path] src=[source code path] [flags]" << std::endl;    
     std::wcout << std::endl;
     std::wcout << "Allowable flags:" << std::endl;
-    std::wcout << "\t-safe - Creates a temporary directory in a place that does not require path changes in .bat and .env files (most often this is the 'trunk' folder)." << std::endl;
-    std::wcout << "\t-full - Changes management report generation instruction to full report generation instruction." << std::endl;
+    std::wcout << "\t-full - changes a management report generation instruction to a full report generation instruction." << std::endl;
     std::wcout << std::endl;
     std::wcout << "Commands and flags should be specified in the launch parameters." << std::endl;
+    std::wcout << "Example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\ -full" << std::endl;
     std::wcout << std::endl;
     std::wcout << " evgeny.gancharik@psa-software.com" << std::endl;
     std::wcout << " 04/22/2020" << std::endl;
@@ -372,39 +368,9 @@ Execute the copies of .bat files to deploy environments
 ------------------------------------------------------------------------------*/
 void deploy(std::string const& regressionScriptsPath, std::string const& sourceCodePath, bool isSafeMode, bool isFullReport)
 {
-
-    std::string tempDirectoryPath;
-
-    
-    std::string warningMessage;
-    if(isSafeMode)
-    {
-        tempDirectoryPath = ::calcSafeTempDirectoryPath(sourceCodePath);
-        std::cout << "The program is launched with the -safe option." << std::endl;
-    }
-    else
-    {
-        tempDirectoryPath = calcExecutablePath();
-        if(::calcSafeTempDirectoryPath(sourceCodePath) != tempDirectoryPath)
-        {
-            std::string warningMessage;
-            warningMessage = "Warning! The program is launched without the -safe option.\n";
-            warningMessage += "A temporary environments directory will be created in the:\n";
-            warningMessage += tempDirectoryPath;
-            warningMessage += "\nTo successful deploying of the environments, the relative paths to the source code will be changed.\n";
-            warningMessage += "This can make it difficult to deploy this environments in the future.\n";
-            warningMessage += "Ways to solve this:\n";
-            //warningMessage += " 1) Re-execute this program from safe dir (in this case its: " + ::calcSafeTempDirectoryPath(sourceCodePath) + ");\n";
-            warningMessage += " 1) Re-Execute this program with -safe parameter\n";
-            warningMessage += " 2) Press any key to ignore this warning and deploy environments anyway";
-            ::showMessage(warningMessage);
-            warningMessage.clear();
-            warningMessage = "Ok...";
-        }
-    }    
-    
+    std::string tempDirectoryPath = ::calcSafeTempDirectoryPath(sourceCodePath);    
     std::string tempDirFullPath = tempDirectoryPath + ::calcTempDirectoryName("tmp") + "\\";
-    warningMessage += "The environments will be copied in the directory: " + tempDirFullPath; 
+    std::string warningMessage = "The environments will be copied in the directory: " + tempDirFullPath; 
     ::showMessage(warningMessage);
     /* create tmp dir */
     CreateDirectoryA(tempDirFullPath.c_str(), NULL);
