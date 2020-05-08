@@ -10,7 +10,7 @@ Environment::Environment(std::filesystem::path const& env, std::filesystem::path
 Function: Environment::moveCopy
 
 \brief Copies the environment files in the 'to/envName' directory;
-changes this instance paths
+changes this instance paths.
 ------------------------------------------------------------------------------*/
 void Environment::moveCopy(std::filesystem::path const& to)
 {
@@ -31,7 +31,7 @@ void Environment::moveCopy(std::filesystem::path const& to)
 
 
 /**-----------------------------------------------------------------------------
-Function: Environment::moveCopy
+Function: Environment::manageToFull
 
 \brief Replaces management report generation instruction to full report generation instruction.
 ------------------------------------------------------------------------------*/
@@ -43,7 +43,7 @@ void Environment::manageToFull() const
     {        
         size_t offset;
     
-        /* replace management report generation instruction to full report generation instruction*/
+        /* replace management report generation instruction to full report generation instruction */
         offset = str.find("reports custom management");
         if (offset != std::string::npos)
         {
@@ -61,6 +61,49 @@ void Environment::manageToFull() const
     writeFileDataFromStringVector(this->bat_, newFfileData);  
 }
 
+
+/**-----------------------------------------------------------------------------
+Function: Environment::disableSbfTemplates
+
+\brief Disables options checkbox 'Enable SBF capability for template functions'.
+// TODO: (!) add comments
+------------------------------------------------------------------------------*/
+void Environment::disableSbfTemplates() const
+{
+    std::vector<std::string> fileData = getFileDataAsStringsVector(this->bat_);
+    std::vector<std::string> newFfileData;
+    std::vector<std::string>::iterator optionsSectionEnd = fileData.end(); // TODO: (?)
+    bool isSbfTemplatesAlreadyEnabled = false;
+    for(auto &str : fileData)
+    {        
+        size_t offset; // TODO: (!) delete me, use 'str.find' in the if-cond. block
+        if(!isSbfTemplatesAlreadyEnabled)
+        {           
+            if(str.find("echo options") != std::string::npos) /* if current string is options entry */
+            {
+                offset = str.find("echo options VCAST_SBF_TEMPLATES FALSE >> commands.tmp"); // TODO: (?) std::substring will be faster?
+                if (offset != std::string::npos)
+                {
+                    isSbfTemplatesAlreadyEnabled = true;
+                }  
+                optionsSectionEnd = (newFfileData.end() - 1); 
+            }         
+        }    
+        newFfileData.push_back(str); /* write current string in the .bat file */
+    }
+    if(isSbfTemplatesAlreadyEnabled == false)
+    {
+        newFfileData.insert(optionsSectionEnd, "echo options VCAST_SBF_TEMPLATES FALSE >> commands.tmp");
+    }
+    writeFileDataFromStringVector(this->bat_, newFfileData);  
+}
+
+
+/**-----------------------------------------------------------------------------
+Function: Environment::disableSbfTemplates
+
+\brief // TODO: (!) write me
+------------------------------------------------------------------------------*/
  void Environment::deploy() const
  {
     std::string runCmd = (std::string("start /wait /d ") + this->bat_.parent_path().string() + " cmd /c " + this->bat_.string());

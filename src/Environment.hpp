@@ -14,6 +14,7 @@ public:
     inline std::string getName() const { return this->env_.stem().string(); }
     void moveCopy(std::filesystem::path const& to);
     void manageToFull() const; // TODO: mb not const (?) (!)
+    void disableSbfTemplates() const;
     void deploy() const;
 private:
     std::filesystem::path env_;

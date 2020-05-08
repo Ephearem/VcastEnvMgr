@@ -15,7 +15,7 @@ Function: showHelp
 void showHelp()
 {
     std::wcout << std::endl;
-    std::wcout << "VcastEnvMgr v0.01" << std::endl;
+    std::wcout << "VcastEnvMgr v0.02" << std::endl;
     std::wcout << " * * * HELP * * *" << std::endl;    
     std::wcout << std::endl;
     std::wcout << "Brief:" << std::endl;
@@ -30,13 +30,14 @@ void showHelp()
     std::wcout << std::endl;
     std::wcout << "Allowable flags:" << std::endl;
     std::wcout << "\t-full - changes a management report generation instruction to a full report generation instruction." << std::endl;
+    std::wcout << "\t-disablesbftemplates - disables options checkbox 'Enable SBF capability for template functions'." << std::endl;    
     std::wcout << std::endl;
     std::wcout << "Commands and flags should be specified in the launch parameters." << std::endl;
-    std::wcout << "Example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\ -full" << std::endl;
+    std::wcout << "Example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\ -full -disablesbftemplates" << std::endl;
     std::wcout << std::endl;
     std::wcout << " evgeny.gancharik@psa-software.com" << std::endl;
-    std::wcout << " 04/22/2020" << std::endl;
-    std::cout << std::endl;
+    std::wcout << " 05/08/2020" << std::endl;
+    std::wcout << std::endl;
 }
 
 
@@ -163,6 +164,8 @@ int main(int argc, char** argv)
     std::filesystem::path regressionScripts;
     std::filesystem::path sourceCode;
     bool isFullReport = false;
+    bool isDisableSbfTemplates = false;
+
 
 
     /* parse input args */
@@ -174,7 +177,9 @@ int main(int argc, char** argv)
         else if(curStr.find("src=") != std::string::npos)
             sourceCode = curStr.substr(4, curStr.size() - 4);
         else if(curStr == "-full")
-            isFullReport = true;            
+            isFullReport = true; 
+        else if(curStr == "-disablesbftemplates")
+            isDisableSbfTemplates = true;           
     }
    
     /* does regression scripts directory exist ? */
@@ -218,6 +223,8 @@ int main(int argc, char** argv)
     std::cout << "Regression scripts directory: " << regressionScripts.string() << std::endl;
     std::cout << "Source code directory: " << sourceCode.string() << std::endl;
     std::cout << "Generate full reports: " << (isFullReport ? "true" : "false") << std::endl;
+    std::cout << "Disable SBF templates: " << (isDisableSbfTemplates ? "true" : "false") << std::endl;
+
     std::cout << std::endl;
 
     std::cout << "There are " << envs.size() << " regression scripts found in the selected directory." << std::endl;
@@ -231,6 +238,10 @@ int main(int argc, char** argv)
         if(isFullReport) // TODO: it's so bad to check this for every loop iteration
         {
             e.manageToFull();           
+        }
+        if(isDisableSbfTemplates)
+        {
+            e.disableSbfTemplates();
         }
         std::cout << "Deploying " << e.getName() << "..." << std::endl;
         e.deploy(); 
