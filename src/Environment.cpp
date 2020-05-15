@@ -61,7 +61,7 @@ void Environment::manageToFull() const
     writeFileDataFromStringVector(this->bat_, newFfileData);  
 }
 
-
+#include <iostream>
 /**-----------------------------------------------------------------------------
 Function: Environment::disableSbfTemplates
 
@@ -72,30 +72,33 @@ void Environment::disableSbfTemplates() const
 {
     std::vector<std::string> fileData = getFileDataAsStringsVector(this->bat_);
     std::vector<std::string> newFfileData;
-    std::vector<std::string>::iterator optionsSectionEnd = fileData.end(); // TODO: (?)
+    size_t optionSectionEndIndex = 0;
     bool isSbfTemplatesAlreadyEnabled = false;
-    for(auto &str : fileData)
-    {        
+
+    // TODO: (!) Don't create newFileData vector. Just add 1 string in fileData vector.
+    for(size_t i = 0; i < fileData.size(); i++)
+    {
         size_t offset; // TODO: (!) delete me, use 'str.find' in the if-cond. block
         if(!isSbfTemplatesAlreadyEnabled)
         {           
-            if(str.find("echo options") != std::string::npos) /* if current string is options entry */
+            if((fileData[i]).find("echo options") != std::string::npos) /* if current string is options entry */
             {
-                offset = str.find("echo options VCAST_SBF_TEMPLATES FALSE >> commands.tmp"); // TODO: (?) std::substring will be faster?
+                offset = (fileData[i]).find("echo options VCAST_SBF_TEMPLATES FALSE >> commands.tmp"); // TODO: (?) std::substring will be faster?
                 if (offset != std::string::npos)
                 {
                     isSbfTemplatesAlreadyEnabled = true;
                 }  
-                optionsSectionEnd = (newFfileData.end() - 1); 
+                optionSectionEndIndex = i; 
             }         
         }    
-        newFfileData.push_back(str); /* write current string in the .bat file */
+        newFfileData.push_back(fileData[i]); /* write current string in the .bat file */
     }
+
     if(isSbfTemplatesAlreadyEnabled == false)
     {
-        newFfileData.insert(optionsSectionEnd, "echo options VCAST_SBF_TEMPLATES FALSE >> commands.tmp");
+        newFfileData.insert(newFfileData.begin() + optionSectionEndIndex, "echo options VCAST_SBF_TEMPLATES FALSE >> commands.tmp");
     }
-    writeFileDataFromStringVector(this->bat_, newFfileData);  
+    writeFileDataFromStringVector(this->bat_, newFfileData);
 }
 
 

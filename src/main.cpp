@@ -15,7 +15,7 @@ Function: showHelp
 void showHelp()
 {
     std::wcout << std::endl;
-    std::wcout << "VcastEnvMgr v0.02" << std::endl;
+    std::wcout << "VcastEnvMgr v0.03" << std::endl;
     std::wcout << " * * * HELP * * *" << std::endl;    
     std::wcout << std::endl;
     std::wcout << "Brief:" << std::endl;
@@ -36,7 +36,7 @@ void showHelp()
     std::wcout << "Example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\ -full -disablesbftemplates" << std::endl;
     std::wcout << std::endl;
     std::wcout << " evgeny.gancharik@psa-software.com" << std::endl;
-    std::wcout << " 05/08/2020" << std::endl;
+    std::wcout << " " << __DATE__ << std::endl;
     std::wcout << std::endl;
 }
 
