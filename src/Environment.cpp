@@ -18,7 +18,7 @@ void Environment::moveCopy(std::filesystem::path const& to)
     std::filesystem::path newEnvDir = to / this->getName();
     std::filesystem::create_directory(newEnvDir);
 
-    // TODO: process errors
+    // TODO: (!) process errors
     std::filesystem::copy_file(this->env_, newEnvDir / this->env_.filename());
     std::filesystem::copy_file(this->bat_, newEnvDir / this->bat_.filename());
     std::filesystem::copy_file(this->tst_, newEnvDir / this->tst_.filename());
@@ -26,7 +26,7 @@ void Environment::moveCopy(std::filesystem::path const& to)
     this->env_ = newEnvDir / this->env_.filename();
     this->bat_ = newEnvDir / this->bat_.filename();
     this->tst_ = newEnvDir / this->tst_.filename();
-    // TODO: call std::filesystem::exists() (?)
+    // TODO: (!) call std::filesystem::exists() (?)
 }
 
 
@@ -51,8 +51,8 @@ void Environment::manageToFull() const
             str.replace(managementWordPos, 6, " full ");
             str.erase(managementWordPos + 6, 6);
 
-            size_t reportNamePos = str.find("_management_report.html"); // TODO: create a constant for this token (?)
-            str.replace(reportNamePos, 17, "_FULL_REPORT.html"); // TODO: get postfix in .exe start params (?)
+            size_t reportNamePos = str.find("_management_report.html"); // TODO: (!) create a constant for this token (?)
+            str.replace(reportNamePos, 17, "_FULL_REPORT.html"); // TODO: (!) get postfix in .exe start params (?)
             str.erase(reportNamePos + 17, 6);
         }
     
@@ -61,7 +61,7 @@ void Environment::manageToFull() const
     writeFileDataFromStringVector(this->bat_, newFfileData);  
 }
 
-#include <iostream>
+
 /**-----------------------------------------------------------------------------
 Function: Environment::disableSbfTemplates
 
@@ -78,7 +78,7 @@ void Environment::disableSbfTemplates() const
     // TODO: (!) Don't create newFileData vector. Just add 1 string in fileData vector.
     for(size_t i = 0; i < fileData.size(); i++)
     {
-        size_t offset; // TODO: (!) delete me, use 'str.find' in the if-cond. block
+        size_t offset = std::string::npos; // TODO: (!) delete me, use 'str.find' in the if-cond. block
         if(!isSbfTemplatesAlreadyEnabled)
         {           
             if((fileData[i]).find("echo options") != std::string::npos) /* if current string is options entry */

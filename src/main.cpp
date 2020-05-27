@@ -15,7 +15,7 @@ Function: showHelp
 void showHelp()
 {
     std::wcout << std::endl;
-    std::wcout << "VcastEnvMgr v0.03" << std::endl;
+    std::wcout << "VcastEnvMgr v0.04" << std::endl;
     std::wcout << " * * * HELP * * *" << std::endl;    
     std::wcout << std::endl;
     std::wcout << "Brief:" << std::endl;
@@ -35,7 +35,7 @@ void showHelp()
     std::wcout << "Commands and flags should be specified in the launch parameters." << std::endl;
     std::wcout << "Example: -deploy rs=F:\\VPR\\trunk\\regression_scripts\\Voting\\ src=F:\\VPR\\trunk\\src\\ -full -disablesbftemplates" << std::endl;
     std::wcout << std::endl;
-    std::wcout << " evgeny.gancharik@psa-software.com" << std::endl;
+    std::wcout << " evgeny.gancharik@psa.inc" << std::endl;
     std::wcout << " " << __DATE__ << std::endl;
     std::wcout << std::endl;
 }
@@ -44,7 +44,7 @@ void showHelp()
 /**-----------------------------------------------------------------------------
 Function: error
 
-\brief Logs an error and terminates the process with error code.
+\brief Logs an error, show help and terminates the process with error code.
 ------------------------------------------------------------------------------*/
 void error(std::string const& text, int code, bool isShowHelp = false)
 {
@@ -55,6 +55,31 @@ void error(std::string const& text, int code, bool isShowHelp = false)
     exit(code);
 }
 
+
+/**-----------------------------------------------------------------------------
+Function: error
+
+\brief Logs a message with prefix equals to current time (HH:MM:SS)
+------------------------------------------------------------------------------*/
+void log(std::string const& text)
+{
+    static time_t tt;      
+    static tm TM;
+    time( &tt );  
+    TM = *localtime( &tt );
+
+    std::string timeStampPrefix;
+    if(TM.tm_hour < 10)
+        timeStampPrefix += '0';
+    timeStampPrefix += std::to_string(TM.tm_hour) + ":";
+    if(TM.tm_min < 10)
+        timeStampPrefix += '0';
+    timeStampPrefix += std::to_string(TM.tm_min) + ":";
+    if(TM.tm_sec < 10)
+        timeStampPrefix += '0';
+    timeStampPrefix += std::to_string(TM.tm_sec);
+    std::cout << timeStampPrefix << ": " << text << std::endl;
+}
 
 /**-----------------------------------------------------------------------------
 Function: calcTempDirectorySafePath
@@ -86,7 +111,7 @@ std::string calcTempDirectoryName(std::string const& prefix)
     retValue += std::to_string(TM.tm_year + 1900);
     if(TM.tm_mon < 10)
         retValue.push_back('0');
-    retValue += std::to_string(TM.tm_mon);
+    retValue += std::to_string(TM.tm_mon + 1); // why?
     if(TM.tm_mday < 10)
         retValue.push_back('0');
     retValue += std::to_string(TM.tm_mday);    
@@ -148,10 +173,14 @@ std::vector<Environment> searchEnvs(std::filesystem::path const& path)
 }
 
 
+/**-----------------------------------------------------------------------------
+Function: main
 
+\brief 
+// TODO: (!) write me
+------------------------------------------------------------------------------*/
 int main(int argc, char** argv)
 {
-    /* .exe full name; -deploy; rs=; src=; */
     if(argc < 4)
     {
         ::error("Invalid number of arguments. Read help for more information.", 1, true);
@@ -243,7 +272,8 @@ int main(int argc, char** argv)
         {
             e.disableSbfTemplates();
         }
-        std::cout << "Deploying " << e.getName() << "..." << std::endl;
+        
+        ::log("deploying " + e.getName() + "...");
         e.deploy(); 
     }
 
